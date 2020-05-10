@@ -1,0 +1,6 @@
+int main() {
+	int n, a, b;
+	n = - a;
+	//if(n > 0) a = 0;
+	//	else b = 0;
+}

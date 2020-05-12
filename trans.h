@@ -3,7 +3,8 @@
 typedef struct Operand_* Operand;
 typedef struct InterCodes_* InterCodes;
 struct Operand_ {
-	enum { VARIABLE, CONSTANT, ADDRESS} kind;
+	enum { VARIABLE, CONSTANT, ADDRESS, LOCATION} kind;
+//addr &      location *
 	union {
 		int var_no;
 		int value;
@@ -13,7 +14,7 @@ struct Operand_ {
 
 struct InterCode {//one line of code
 	enum {ASSIGN, ADD, SUB, MUL, DIVI, LABEL, CON, GOTO, BACK,
-		READ, WRITE, CALL, ARG, FUNC, PARAM} kind;
+		READ, WRITE, CALL, ARG, FUNC, PARAM, DEC} kind;
 	union {
 		struct {Operand right, left;} assign;
 		struct {Operand result, op1, op2;} binop;
@@ -27,6 +28,7 @@ struct InterCode {//one line of code
 		struct {Operand name;} arg;
 		struct {Operand name;} func;
 		struct {Operand name;} param;
+		struct {Operand name, size;} dec;
 	} u;
 };
 
@@ -55,6 +57,8 @@ struct codeList createLabel(char* name);
 struct codeList createGoto(char* name);
 void createVar(Operand* t, char* name);
 void createConstant(Operand* t, int q);
+void createLocation(Operand* t, char* name);
+void createAddress(Operand* t, char* name);
 struct codeList codePatch(InterCodes a, InterCodes* b, InterCodes* c, InterCodes d);
 struct codeList translate_Exp(struct Node* node, char* place);
 struct codeList translate_Cond(struct Node* node, char* t, char* f);
@@ -65,4 +69,7 @@ struct codeList translate_FunDec(struct Node* node);
 struct codeList translate_VarList(struct Node* node);
 struct codeList translate_ParamDec(struct Node* node);
 char* translate_VarDec(struct Node* node);
+struct codeList translate_Dec(struct Node* node);
+struct codeList translate_Location(struct Node* node, char* place);
+int getSize(Type t);
 #endif

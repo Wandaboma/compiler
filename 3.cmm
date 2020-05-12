@@ -2,7 +2,7 @@ struct Operands
 {
 	int o1;
 	int o2;
-}
+};
 
 int add(struct Operands temp)
 {

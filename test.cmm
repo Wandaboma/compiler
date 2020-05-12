@@ -1,6 +1,9 @@
+struct Operands {
+	int o1;
+	int o2;
+};
 int main() {
-	int n, a, b;
-//	n = - a;
-	if(n > 0) a = 0;
-		else b = 0;
+	struct Operands op;
+	op.o1 = 1;
+	op.o2 = 2;
 }

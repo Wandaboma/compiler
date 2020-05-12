@@ -29,7 +29,7 @@ struct codeList codePatch(InterCodes a, InterCodes* b, InterCodes* c, InterCodes
 	//TODO:watch out for NULL patch
 	struct codeList ans;
 	(*b)->next = *c;
-	(*c)->prev = *b;
+    (*c)->prev = *b;
 	ans.head = a;
 	ans.tail = d;
 	return ans;
@@ -45,6 +45,18 @@ void createConstant(Operand* t, int q) {
 	(*t) = (Operand)malloc(sizeof(struct Operand_));
 	(*t)->kind = CONSTANT;
 	(*t)->u.value = q;
+}
+
+void createLocation(Operand* t, char* name) {
+	(*t) = (Operand)malloc(sizeof(struct Operand_));
+	(*t)->kind = LOCATION;
+	myStrcpy(&(*t)->u.val_na, name);
+}
+
+void createAddress(Operand* t, char* name) {
+	(*t) = (Operand)malloc(sizeof(struct Operand_));
+	(*t)->kind = ADDRESS;
+	myStrcpy(&(*t)->u.val_na, name);
 }
 
 struct codeList createLabel(char* name) {
@@ -132,7 +144,32 @@ struct codeList translate_Exp(struct Node* node, char* place) {
 			ans = code1;
 		}
 		else {
-			//TODO: array and struct
+			char* t1 = newTemp();
+			char* t2 = newTemp();
+			struct codeList code1, code2, code3, code4;
+			code1 = translate_Location(node->child[1], t1);
+			code2 = translate_Exp(node->child[3], t2);
+			
+			InterCodes p1 = (InterCodes)malloc(sizeof(struct InterCodes_));
+			p1->code.kind = ASSIGN;
+			createLocation(&p1->code.u.assign.left, t1);
+			createVar(&p1->code.u.assign.right, t2);
+			p1->prev = p1->next = NULL;
+			code3.head = code3.tail = p1;
+
+			if(place != NULL) {
+				InterCodes p2 = (InterCodes)malloc(sizeof(struct InterCodes_));
+				p2->code.kind = ASSIGN;
+				createVar(&p2->code.u.assign.left, place);
+				createLocation(&p2->code.u.assign.right, t1);
+				p2->prev = p2->next = NULL;
+				code4.head = code4.tail = p2;
+				code3 = codePatch(code3.head, &code3.tail, &code4.head, code4.tail);
+			}
+
+			code1 = codePatch(code1.head, &code1.tail, &code2.head, code2.tail);
+			code1 = codePatch(code1.head, &code1.tail, &code3.head, code3.tail);
+			ans = code1;
 		}
 	}
 	else if(!strcmp(node->child[2]->info, "PLUS") || !strcmp(node->child[2]->info, "MINUS") 
@@ -216,6 +253,21 @@ struct codeList translate_Exp(struct Node* node, char* place) {
 		}
 		ans = code1;
 	}
+	else if(!strcmp(node->child[2]->info, "LB") || !strcmp(node->child[2]->info, "DOT")) {
+		char* t1 = newTemp();
+		struct codeList code1, code2;
+		code1 = translate_Location(node, t1);
+		
+		InterCodes p = (InterCodes)malloc(sizeof(struct InterCodes_));
+		p->code.kind = ASSIGN;
+		createVar(&p->code.u.assign.left, place);
+		createLocation(&p->code.u.assign.right, t1);
+		p->prev = p->next = NULL;
+		code2.head = code2.tail = p;
+
+		code1 = codePatch(code1.head, &code1.tail, &code2.head, code2.tail);
+		ans = code1;
+	}
 	else {
 		char* label1 = newLabel();
 		char* label2 = newLabel();
@@ -246,6 +298,76 @@ struct codeList translate_Exp(struct Node* node, char* place) {
 		code0 = codePatch(code0.head, &code0.tail, &code3.head, code3.tail);
 		code0 = codePatch(code0.head, &code0.tail, &code4.head, code4.tail);
 		ans = code0;
+	}
+	return ans;
+}
+
+struct codeList translate_Location(struct Node* node, char* place) {
+	struct codeList ans;
+	if(!strcmp(node->child[1]->info, "ID")) {
+		InterCodes p = (InterCodes)malloc(sizeof(struct InterCodes_));
+		p->code.kind = ASSIGN;
+		createVar(&p->code.u.assign.left, place);
+		createAddress(&p->code.u.assign.right, node->child[1]->type_string);
+		p->prev = p->next = NULL;
+		
+		struct codeList code1;
+		code1.head = code1.tail = p;
+		ans = code1;
+	}
+	else if(!strcmp(node->child[2]->info, "LB")) {
+		struct codeList code1, code2, code3, code4;
+		char* t1 = newTemp();
+		code1 = translate_Location(node->child[1], t1);
+		char* t2 = newTemp();
+		code2 = translate_Exp(node->child[3], t2);
+		
+		int temp = getSize(node->t);
+		char* t3 = newTemp();
+		InterCodes p1 = (InterCodes)malloc(sizeof(struct InterCodes_));
+		p1->code.kind = MUL;
+		createVar(&p1->code.u.binop.result, t3);
+		createVar(&p1->code.u.binop.op1, t2);
+		createConstant(&p1->code.u.binop.op2, temp);
+		p1->prev = p1->next = NULL;
+		code3.head = code3.tail = p1;
+	
+		InterCodes p2 = (InterCodes)malloc(sizeof(struct InterCodes_));
+		p2->code.kind = ADD;
+		createVar(&p2->code.u.binop.result, place);
+		createVar(&p2->code.u.binop.op1, t1);
+		createVar(&p2->code.u.binop.op2, t3);
+		p2->prev = p2->next = NULL;
+		code4.head = code4.tail = p2;
+		
+		code1 = codePatch(code1.head, &code1.tail, &code2.head, code2.tail);
+		code1 = codePatch(code1.head, &code1.tail, &code3.head, code3.tail);
+		code1 = codePatch(code1.head, &code1.tail, &code4.head, code4.tail);
+		ans = code1;
+	}
+	else {
+		struct codeList code1, code2;
+		char* t1 = newTemp();
+		code1 = translate_Location(node->child[1], t1);
+
+		int size = 0;
+		FieldList temp = node->child[1]->t->u.structure;
+		while(temp != NULL) {
+			if(!strcmp(temp->name, node->child[3]->type_string)) break;
+			size = size + getSize(temp->type);
+			temp = temp->tail;
+		}
+
+		InterCodes p = (InterCodes)malloc(sizeof(struct InterCodes_));
+		p->code.kind = ADD;
+		createVar(&p->code.u.binop.result, place);
+		createVar(&p->code.u.binop.op1, t1);
+		createConstant(&p->code.u.binop.op2, size);
+		p->prev = p->next = NULL;
+		code2.head = code2.tail = p;
+
+		code1 = codePatch(code1.head, &code1.tail, &code2.head, code2.tail);
+		ans = code1;
 	}
 	return ans;
 }
@@ -435,7 +557,8 @@ struct codeList translate_Stmt(struct Node* node) {
 
 struct codeList translate_CompSt(struct Node* node) {
 //TODO: consider def
-	return translate(node->child[3]);
+//	return translate(node->child[3]);
+	return translate(node);
 }
 
 struct codeList translate_FunDec(struct Node* node) {
@@ -489,6 +612,64 @@ char* translate_VarDec(struct Node* node) {
 	else return translate_VarDec(node->child[1]);
 }
 
+int getSize(Type t) {
+	int s;
+	if(t->kind == BASIC) return 4;
+	if(t->kind == ARRAY) {
+		s = 1;
+		Type temp = t;
+		while(temp->kind == ARRAY) {
+			s = s * temp->u.array.size;
+			temp = temp->u.array.elem;
+		}
+		s = s * getSize(temp);
+	}
+	else {
+		s = 0;
+		FieldList temp = t->u.structure;
+		while(temp != NULL) {
+			s = s + getSize(temp->type);
+			temp = temp->tail;
+		}
+	}
+	return s;
+}
+
+struct codeList translate_Dec(struct Node* node) {
+	struct codeList ans, code1, code2, code3;
+	code1.head = code1.tail = NULL;
+	char* str = translate_VarDec(node->child[1]);
+	
+	if(node->child[1]->head->type->kind != BASIC) {
+		int L = getSize(node->child[1]->head->type);
+		InterCodes p1 = (InterCodes)malloc(sizeof(struct InterCodes_));
+		p1->code.kind = DEC;
+		createVar(&p1->code.u.dec.name, str);
+		createConstant(&p1->code.u.dec.size, L);
+		p1->prev = p1->next = NULL;
+		code1.head = code1.tail = p1;
+	}
+
+	if(node->num == 3) {
+		char* t1 = newTemp();
+		code2 = translate_Exp(node->child[3], t1);
+		
+		InterCodes p = (InterCodes)malloc(sizeof(struct InterCodes_));
+		p->code.kind = ASSIGN;
+		createVar(&p->code.u.assign.left, str);
+		createVar(&p->code.u.assign.right, t1);
+		p->prev = p->next = NULL;
+		struct codeList code3;
+		code3.head = code3.tail = p;
+		
+		if(code1.head == NULL) code1 = code2;
+		else code1 = codePatch(code1.head, &code1.tail, &code2.head, code2.tail);
+		code1 = codePatch(code1.head, &code1.tail, &code3.head, code3.tail);
+	}
+	ans = code1;
+	return ans;
+}
+
 struct codeList translate(struct Node* node){
 //	printf("%s\n", node->info);
 	struct codeList ans;
@@ -501,6 +682,9 @@ struct codeList translate(struct Node* node){
 	}
 	else if(!strcmp(node->info, "FunDec")) {
 		ans = translate_FunDec(node);
+	}
+	else if(!strcmp(node->info, "Dec")) {
+		ans = translate_Dec(node);
 	}
 	else {
 		for(int i = 1; i <= node->num; i++) {
@@ -522,6 +706,8 @@ struct codeList translate(struct Node* node){
 void printOp(Operand p) {
 	if(p->kind == VARIABLE) printf("%s", p->u.val_na);
 	else if(p->kind == CONSTANT) printf("#%d", p->u.value);
+	else if(p->kind == ADDRESS) printf("&%s", p->u.val_na);
+	else if(p->kind == LOCATION) printf("*%s", p->u.val_na);
 }
 
 void printCode(InterCodes node) {
@@ -593,6 +779,11 @@ void printCode(InterCodes node) {
 		else if(loop->code.kind == PARAM) {
 			printf("PARAM ");
 			printOp(loop->code.u.param.name);
+		}
+		else if(loop->code.kind == DEC) {
+			printf("DEC ");
+			printOp(loop->code.u.dec.name);
+			printf(" %d", loop->code.u.dec.size->u.value);
 		}
 		printf("\n");
 		loop = loop->next;

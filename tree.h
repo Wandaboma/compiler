@@ -1,6 +1,7 @@
 #ifndef _TREE_H_
 #define _TREE_H_
 typedef struct Type_* Type;
+typedef struct Arg_* Arg;
 typedef struct FieldList_* FieldList;
 typedef struct FuncList_* FuncList;
 
@@ -24,6 +25,12 @@ struct FieldList_ {
 int fieldLevel;
 
 FieldList table[50];
+
+struct Arg_ {
+	char* name;
+	Arg next;
+};
+Arg argTable;
 
 struct FuncList_ {
 	//0 undefined
@@ -50,6 +57,7 @@ struct Node {
 		char* type_string;
 	};
 };
+
 struct Node* root;
 int flag;
 void yyerror(char* msg);
@@ -58,7 +66,6 @@ struct Node* createFloatNode(int L, float val, char* text);
 struct Node* createStrNode(int L, char* info, char* text);
 void addNode(struct Node* top, struct Node* down);
 void printTree(struct Node* top, int level);
-
 void myStrcpy(char** str, char* temp);
 void output(FieldList temp);
 int typeCompare(Type t1, Type t2);

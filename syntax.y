@@ -63,6 +63,7 @@ Program : ExtDefList {
 		root = $$;
 
 		prepare();
+		argTable = NULL;
 		semanticAnal(root);
 
 		tempNum = labelNum = 0;

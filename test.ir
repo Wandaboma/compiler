@@ -1,0 +1,69 @@
+
+FUNCTION calculate :
+PARAM class
+t5 := &class
+t4 := t5 + #0
+t6 := #0
+t7 := t6 * #8
+t3 := t4 + t7
+t2 := t3 + #4
+t1 := *t2
+WRITE t1
+t12 := &class
+t11 := t12 + #0
+t13 := #0
+t14 := t13 * #8
+t10 := t11 + t14
+t8 := t10 + #4
+t9 := #5
+*t8 := t9
+t19 := &class
+t18 := t19 + #0
+t20 := #0
+t21 := t20 * #8
+t17 := t18 + t21
+t16 := t17 + #4
+t15 := *t16
+WRITE t15
+t22 := #0
+RETURN t22
+FUNCTION main :
+DEC school 4040
+t23 := #0
+i1 := t23
+t24 := #0
+j1 := t24
+t25 := #50
+N1 := t25
+t26 := #10
+N2 := t26
+t32 := &school
+t33 := i1
+t34 := t33 * #404
+t31 := t32 + t34
+t30 := t31 + #0
+t35 := j1
+t36 := t35 * #8
+t29 := t30 + t36
+t27 := t29 + #4
+t28 := #10
+*t27 := t28
+t42 := &school
+t43 := i1
+t44 := t43 * #404
+t41 := t42 + t44
+t40 := t41 + #0
+t45 := j1
+t46 := t45 * #8
+t39 := t40 + t46
+t38 := t39 + #4
+t37 := *t38
+WRITE t37
+t48 := &school
+t49 := i1
+t50 := t49 * #404
+t47 := t48 + t50
+ARG t47
+t51 := CALL calculate
+t52 := #0
+RETURN t52

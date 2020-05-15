@@ -156,7 +156,15 @@ int typeCompare(Type t1, Type t2) {
 	}
 }
 
+void addArgTable(char* name) {
+	Arg temp = (Arg) malloc(sizeof(struct Arg_));
+	myStrcpy(&temp->name, name);
+	temp->next = argTable;
+	argTable = temp;
+}
+
 int addTable(FieldList *temp) {
+	
 	flag = 1;
 	if(table[fieldLevel] == NULL) {
 		FieldList node;
@@ -310,7 +318,7 @@ FuncList findFunc(char* str) {
 }
 
 void semanticAnal(struct Node* node) {
-	//printf("Node: %s\n", node->info);
+//	printf("Node: %s\n", node->info);
 	
 	if(strcmp(node->info, "Program") == 0){
 		semanticAnal(node->child[1]);
@@ -367,6 +375,7 @@ void semanticAnal(struct Node* node) {
 							FieldList q = (FieldList)malloc(sizeof(struct FieldList_));
 							myStrcpy(&q->name, temp->name);
 							q->type = temp->type;
+							if(q->type->kind != BASIC) addArgTable(q->name);
 							q->line = temp->line;
 							q->tail = NULL;
 							q->tag = 0;

@@ -1,7 +1,7 @@
 
 FUNCTION calculate :
 PARAM class
-t5 := &class
+t5 := class
 t4 := t5 + #0
 t6 := #0
 t7 := t6 * #8
@@ -9,7 +9,7 @@ t3 := t4 + t7
 t2 := t3 + #4
 t1 := *t2
 WRITE t1
-t12 := &class
+t12 := class
 t11 := t12 + #0
 t13 := #0
 t14 := t13 * #8
@@ -17,7 +17,7 @@ t10 := t11 + t14
 t8 := t10 + #4
 t9 := #5
 *t8 := t9
-t19 := &class
+t19 := class
 t18 := t19 + #0
 t20 := #0
 t21 := t20 * #8

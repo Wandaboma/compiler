@@ -752,7 +752,7 @@ void printOp(Operand p) {
 }
 
 void printCode(InterCodes node) {
-	freopen("./workdir/a.ir", "w", stdout);
+//	freopen("./workdir/a.ir", "w", stdout);
 	InterCodes loop;
 	loop = node;
 	int f = 0;
@@ -834,5 +834,5 @@ void printCode(InterCodes node) {
 		printf("\n");
 		loop = loop->next;
 	}
-	fclose(stdout);
+//	fclose(stdout);
 }

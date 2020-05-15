@@ -1,15 +1,17 @@
-t2 := n
-**************************
-t3 := #1
-***************************
+FUNCTION test :
+PARAM w
+t1 := #0
+RETURN t1
 FUNCTION main :
-t1 := #1
-n := t1
-t2 := n
-t3 := #1
-IF t2 == t3 GOTO label1
+t2 := #1
+n := t2
+t3 := n
+t4 := #1
+IF t3 == t4 GOTO label1
 GOTO label2
 LABEL label1 :
-t4 := #1
-WRITE t4
+t5 := #1
+WRITE t5
 LABEL label2 :
+t6 := #0
+RETURN t6

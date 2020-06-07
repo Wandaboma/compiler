@@ -3,6 +3,7 @@
 #include "lex.yy.c"
 #include "tree.h"
 #include "trans.h"
+#include "target.h"
 %}
 %locations
 %union {
@@ -68,9 +69,11 @@ Program : ExtDefList {
 
 		tempNum = labelNum = 0;
 		struct codeList temp;
+		offTable = paramTable = NULL;
 		temp = translate(root);
-		printCode(temp.head);
+//		printCode(temp.head);
 //		printTree($$, 0);
+		targetGen(temp.head);
 	}
 	;
 ExtDefList : ExtDef ExtDefList {

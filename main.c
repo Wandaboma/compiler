@@ -8,6 +8,7 @@ extern int yylineno;
 int main(int argc, char** argv) {
 	if (argc <= 1) return 1;
 	FILE* f = fopen(argv[1], "r");
+	filename = argv[2];
 	if (!f)
 	{
 		perror(argv[1]);

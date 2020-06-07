@@ -11,6 +11,7 @@ char* newTemp() {
 	strcat(str1, str2);
 	char* t;
 	myStrcpy(&t, str1);
+	addOffTable(t, 4);
 	return t;
 }
 
@@ -463,6 +464,9 @@ struct codeList translate_Cond(struct Node* node, char* t, char* f) {
 
 		ans = code1;
 	}
+	else if(!strcmp(node->child[1]->info, "LP")) {
+		return translate_Cond(node->child[2], t, f);
+	}
 	else if(!strcmp(node->child[2]->info, "Exp")) {
 		return translate_Cond(node->child[2], f, t);	
 	}
@@ -603,6 +607,9 @@ struct codeList translate_CompSt(struct Node* node) {
 }
 
 struct codeList translate_FunDec(struct Node* node) {
+	offTemp = 0;
+	paramTemp = 0;
+
 	struct codeList ans;
 	InterCodes p = (InterCodes)malloc(sizeof(struct InterCodes_));
 	p->code.kind = FUNC;
@@ -636,6 +643,15 @@ struct codeList translate_VarList(struct Node* node) {
 	return ans;
 }
 
+void addParamTable(char* str) {
+	struct offset* temp = (struct offset*)malloc(sizeof(struct offset));
+	myStrcpy(&temp->str, str);
+	temp->t = paramTemp;
+	paramTemp = paramTemp + 4;
+	temp->next = paramTable;
+	paramTable = temp;
+}
+
 struct codeList translate_ParamDec(struct Node* node) {
 	char* str = translate_VarDec(node->child[2]);
 	InterCodes p = (InterCodes)malloc(sizeof(struct InterCodes_));
@@ -643,6 +659,7 @@ struct codeList translate_ParamDec(struct Node* node) {
 	createVar(&p->code.u.param.name, str);
 	p->prev = p->next = NULL;
 
+	addParamTable(str);
 	struct codeList ans;
 	ans.head = ans.tail = p;
 	return ans;
@@ -676,13 +693,23 @@ int getSize(Type t) {
 	return s;
 }
 
+void addOffTable(char* str, int size) {
+	struct offset *temp = (struct offset*)malloc(sizeof(struct offset));
+	myStrcpy(&temp->str, str);
+	temp->t = offTemp;
+	offTemp = offTemp + size;
+	temp->next = offTable;
+	offTable = temp;
+}
+
 struct codeList translate_Dec(struct Node* node) {
 	struct codeList ans, code1, code2, code3;
 	code1.head = code1.tail = NULL;
 	char* str = translate_VarDec(node->child[1]);
-	
+	//TODO: add vairable type here	
+	int L = 4;
 	if(node->child[1]->head->type->kind != BASIC) {
-		int L = getSize(node->child[1]->head->type);
+		L = getSize(node->child[1]->head->type);
 		InterCodes p1 = (InterCodes)malloc(sizeof(struct InterCodes_));
 		p1->code.kind = DEC;
 		createVar(&p1->code.u.dec.name, str);
@@ -690,6 +717,8 @@ struct codeList translate_Dec(struct Node* node) {
 		p1->prev = p1->next = NULL;
 		code1.head = code1.tail = p1;
 	}
+	
+	addOffTable(str, L);
 
 	if(node->num == 3) {
 		char* t1 = newTemp();
@@ -752,7 +781,7 @@ void printOp(Operand p) {
 }
 
 void printCode(InterCodes node) {
-//	freopen("./workdir/a.ir", "w", stdout);
+	//freopen("workdir/a.ir", "w", stdout);
 	InterCodes loop;
 	loop = node;
 	int f = 0;
@@ -834,5 +863,5 @@ void printCode(InterCodes node) {
 		printf("\n");
 		loop = loop->next;
 	}
-//	fclose(stdout);
+	//fclose(stdout);
 }

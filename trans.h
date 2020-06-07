@@ -48,6 +48,15 @@ struct argStr{
 	struct argStr* next;
 };
 
+int offTemp, paramTemp;
+struct offset{
+	char* str;
+	int t;
+	struct offset* next;
+};
+struct offset* offTable;
+struct offset* paramTable;
+
 struct codeList translate(struct Node* node);
 void printOp(Operand p);
 void printCode(InterCodes node);
@@ -72,4 +81,5 @@ char* translate_VarDec(struct Node* node);
 struct codeList translate_Dec(struct Node* node);
 struct codeList translate_Location(struct Node* node, char* place);
 int getSize(Type t);
+void addOffTable(char* str, int size);
 #endif

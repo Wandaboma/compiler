@@ -5,6 +5,8 @@ typedef struct Arg_* Arg;
 typedef struct FieldList_* FieldList;
 typedef struct FuncList_* FuncList;
 
+char* filename;
+
 struct Type_ {
 	enum {BASIC, ARRAY, STRUCTURE} kind;
 	union {

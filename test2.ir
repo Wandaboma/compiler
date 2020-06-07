@@ -1,0 +1,15 @@
+FUNCTION main :
+t1 := #1
+WRITE t1
+t2 := #2
+WRITE t2
+t3 := #3
+WRITE t3
+t4 := #10
+WRITE t4
+t5 := #789
+WRITE t5
+t6 := #0
+WRITE t6
+t7 := #0
+RETURN t7

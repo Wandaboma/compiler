@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <string.h>
 
+int dataSize;
 void initialize() {
 	printf(".data\n");
 	printf("_prompt: .asciiz \"Enter an integer:\"\n");
@@ -28,7 +29,7 @@ void initialize() {
 }
 
 int getOffset(char* name) {
-//+ if it's var, - if it's 
+//+ if it's var, - if it's reg 
 	struct offset* temp = offTable;
 	while(temp != NULL) {
 		if (!strcmp(name, temp->str)) return -temp->t;
@@ -134,25 +135,29 @@ void genWrite(InterCodes node) {
 }
 
 void genCall(InterCodes node) {
-	printf("addi $sp, $sp, -8\n");
+	printf("addi $sp, $sp, -8\n"); 
 	printf("sw $ra, 4($sp)\n");
 	printf("sw $fp, 0($sp)\n");
 	printf("jal %s\n", node->code.u.call.name->u.val_na);
 	printf("move $sp, $fp\n");
 	printf("lw $fp, 0($sp)\n");
 	printf("lw $ra, 4($sp)\n");
-	//TODO: move sp to the end of variables
-
+	
+	printf("move $fp, $sp\n");
+	printf("addi $sp, $sp, %d\n", -dataSize);
 	setVal(node->code.u.call.op1, "v0");
 }
 
-void targetGen(InterCodes node) {
-/*	struct offset* temp = paramTable;
+int getDataSize(char* name) {
+	struct offset* temp = sizeTable;
 	while(temp != NULL) {
-		printf("%s %d\n", temp->str, temp->t);
+		if(!strcmp(temp->str, name)) return temp->t;
 		temp = temp->next;
-	}*/
-	
+	}
+	return 0;
+}
+
+void targetGen(InterCodes node) {
 	freopen(filename, "w", stdout);
 	initialize();
 	
@@ -162,7 +167,8 @@ void targetGen(InterCodes node) {
 		if(loop->code.kind == FUNC) {
 			printf("%s:\n", loop->code.u.func.name->u.val_na);
 			printf("move $fp, $sp\n");
-			//TODO: move sp to the end of variables
+			dataSize = getDataSize(loop->code.u.func.name->u.val_na);
+			printf("addi $sp, $sp, %d\n", -dataSize);
 		}
 		else if(loop->code.kind == LABEL) 
 			printf("%s:\n", loop->code.u.label.pos->u.val_na);

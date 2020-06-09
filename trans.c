@@ -609,7 +609,12 @@ struct codeList translate_CompSt(struct Node* node) {
 struct codeList translate_FunDec(struct Node* node) {
 	offTemp = 0;
 	paramTemp = 0;
-
+	sizeTemp = (struct offset*)malloc(sizeof(struct offset));
+	myStrcpy(&sizeTemp->str, node->child[1]->type_string);
+	sizeTemp->t = 0;
+	sizeTemp->next = sizeTable;
+	sizeTable = sizeTemp;
+	
 	struct codeList ans;
 	InterCodes p = (InterCodes)malloc(sizeof(struct InterCodes_));
 	p->code.kind = FUNC;
@@ -698,6 +703,7 @@ void addOffTable(char* str, int size) {
 	myStrcpy(&temp->str, str);
 	temp->t = offTemp;
 	offTemp = offTemp + size;
+	sizeTemp->t = offTemp;
 	temp->next = offTable;
 	offTable = temp;
 }

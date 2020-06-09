@@ -54,8 +54,10 @@ struct offset{
 	int t;
 	struct offset* next;
 };
+struct offset* sizeTemp;
 struct offset* offTable;
 struct offset* paramTable;
+struct offset* sizeTable;
 
 struct codeList translate(struct Node* node);
 void printOp(Operand p);

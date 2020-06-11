@@ -11,7 +11,7 @@ char* newTemp() {
 	strcat(str1, str2);
 	char* t;
 	myStrcpy(&t, str1);
-	//addOffTable(t, 4);
+	addOffTable(t, 4);
 	return t;
 }
 
@@ -27,7 +27,6 @@ char* newLabel() {
 }
 
 struct codeList codePatch(InterCodes a, InterCodes* b, InterCodes* c, InterCodes d) {
-	//TODO:watch out for NULL patch
 	if(a == NULL || (*b) == NULL) {
 		struct codeList ans;
 		ans.head = *c;
@@ -122,8 +121,6 @@ struct codeList translate_Exp(struct Node* node, char* place) {
 		ans.head = ans.tail = p;
 	}
 	else if(!strcmp(node->child[1]->info, "MINUS")) {
-		//printf("Hello\n");
-		//printf("1\n");
 		char* t1 = newTemp();
 		struct codeList code1, code2;
 		code1 = translate_Exp(node->child[2], t1);
@@ -535,7 +532,6 @@ struct codeList translate_Cond(struct Node* node, char* t, char* f) {
 }
 
 struct codeList translate_Stmt(struct Node* node) {
-//printf("    %s\n", node->info);
 	struct codeList ans;
 	if(!strcmp(node->child[1]->info, "Exp")) {
 		return translate_Exp(node->child[1], NULL);
@@ -624,11 +620,11 @@ struct codeList translate_CompSt(struct Node* node) {
 struct codeList translate_FunDec(struct Node* node) {
 	offTemp = 0;
 	paramTemp = 0;
-	/*sizeTemp = (struct offset*)malloc(sizeof(struct offset));
+	sizeTemp = (struct offset*)malloc(sizeof(struct offset));
 	myStrcpy(&sizeTemp->str, node->child[1]->type_string);
 	sizeTemp->t = 0;
 	sizeTemp->next = sizeTable;
-	sizeTable = sizeTemp;*/
+	sizeTable = sizeTemp;
 	
 	struct codeList ans;
 	InterCodes p = (InterCodes)malloc(sizeof(struct InterCodes_));
@@ -679,7 +675,7 @@ struct codeList translate_ParamDec(struct Node* node) {
 	createVar(&p->code.u.param.name, str);
 	p->prev = p->next = NULL;
 
-	//addParamTable(str);
+	addParamTable(str);
 	struct codeList ans;
 	ans.head = ans.tail = p;
 	return ans;
@@ -716,9 +712,9 @@ int getSize(Type t) {
 void addOffTable(char* str, int size) {
 	struct offset *temp = (struct offset*)malloc(sizeof(struct offset));
 	myStrcpy(&temp->str, str);
-	temp->t = offTemp;
+	temp->t = offTemp + size;
 	offTemp = offTemp + size;
-	//sizeTemp->t = offTemp;
+	sizeTemp->t = offTemp;
 	temp->next = offTable;
 	offTable = temp;
 }
@@ -739,7 +735,7 @@ struct codeList translate_Dec(struct Node* node) {
 		code1.head = code1.tail = p1;
 	}
 	
-	//addOffTable(str, L);
+	addOffTable(str, L);
 
 	if(node->num == 3) {
 		char* t1 = newTemp();
@@ -762,7 +758,6 @@ struct codeList translate_Dec(struct Node* node) {
 }
 
 struct codeList translate(struct Node* node){
-//	printf("%s\n", node->info);
 	struct codeList ans;
 	ans.head = ans.tail = NULL;
 	if(!strcmp(node->info, "Exp")) {
@@ -803,10 +798,11 @@ void printOp(Operand p) {
 
 void printCode(InterCodes node) {
 	//freopen("workdir/a.ir", "w", stdout);
+	printf("#");
 	InterCodes loop;
 	loop = node;
 	int f = 0;
-	while(loop != NULL) {
+//	while(loop != NULL) {
 		if(loop->code.kind == ASSIGN) {
 			Operand tleft = loop->code.u.assign.left;
 			Operand tright = loop->code.u.assign.right;
@@ -882,7 +878,7 @@ void printCode(InterCodes node) {
 			}
 		}
 		printf("\n");
-		loop = loop->next;
-	}
+//		loop = loop->next;
+//	}
 	//fclose(stdout);
 }

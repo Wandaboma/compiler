@@ -38,13 +38,13 @@ int getOffset(char* name) {
 
 	temp = paramTable;
 	while(temp != NULL) {
-		if(!strcmp(name, temp->str)) return temp->t + 4;
+		if(!strcmp(name, temp->str)) return temp->t + 8;
 		temp = temp->next;
 	}
 }
 
 void getVal(Operand p, char* dst) {
-	//value stored in t0
+	//value stored in dst
 	if(p->kind == CONSTANT) 
 		printf("li $%s, %d\n", dst, p->u.value);
 	else {
@@ -61,10 +61,11 @@ void getVal(Operand p, char* dst) {
 }
 
 void setVal(Operand p, char* src) {
+	//store value from src
 	int tOffset = getOffset(p->u.val_na);
 	printf("add $t8, $fp, %d\n", tOffset);
 	if(p->kind != VARIABLE)
-		printf("lw $t8, 0($t8)");
+		printf("lw $t8, 0($t8)\n");
 	printf("sw $%s, 0($t8)\n", src);
 }
 
@@ -105,15 +106,10 @@ void genReturn(InterCodes node) {
 	printf("jr $ra\n");
 }
 
-InterCodes genArg(InterCodes node) {
-	InterCodes temp = node;
-	if(node->next->code.kind == ARG) 
-		temp = genArg(node->next);
-	
+void genArg(InterCodes node) {	
 	printf("addi $sp , $sp, -4\n");
 	getVal(node->code.u.arg.name, "t0");
 	printf("sw $t0, 0($sp)\n");
-	return temp;
 }
 
 void genRead(InterCodes node) {
@@ -143,8 +139,8 @@ void genCall(InterCodes node) {
 	printf("lw $fp, 0($sp)\n");
 	printf("lw $ra, 4($sp)\n");
 	
-	printf("move $fp, $sp\n");
-	printf("addi $sp, $sp, %d\n", -dataSize);
+//	printf("move $fp, $sp\n");
+//	printf("addi $sp, $sp, %d\n", -dataSize);
 	setVal(node->code.u.call.op1, "v0");
 }
 
@@ -165,6 +161,7 @@ void targetGen(InterCodes node) {
 	InterCodes loop;
 	loop = node;
 	while(loop != NULL) {
+		printCode(loop);
 		if(loop->code.kind == FUNC) {
 			printf("%s:\n", loop->code.u.func.name->u.val_na);
 			printf("move $fp, $sp\n");
@@ -189,7 +186,7 @@ void targetGen(InterCodes node) {
 		else if(loop->code.kind == READ) 
 			genRead(loop);
 		else if(loop->code.kind == ARG) 
-			loop = genArg(loop);
+			genArg(loop);
 		else if(loop->code.kind == CALL) 
 			genCall(loop);
 		loop = loop->next;

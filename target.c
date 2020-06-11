@@ -159,6 +159,7 @@ int getDataSize(char* name) {
 
 void targetGen(InterCodes node) {
 	freopen(filename, "w", stdout);
+//	freopen("workdir/a.ir", "w", stdout);
 	initialize();
 	
 	InterCodes loop;

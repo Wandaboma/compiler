@@ -63,7 +63,7 @@ struct Node* createStrNode(int L, char* info, char* text) {
 }
 
 void addNode(struct Node* top, struct Node* down) {
-	//if(down == NULL) return;
+//	if(down == NULL) return;
 	top->num = top->num + 1;
 	top->child[top->num] = down;
 }
@@ -71,6 +71,7 @@ void addNode(struct Node* top, struct Node* down) {
 void printTree(struct Node* top, int level) {
 	int i;
 	if(flag == 0) return;
+	if(top == NULL) return;
 	for(i = 1; i <= level; i++) {
 		printf("  ");
 	}

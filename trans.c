@@ -11,7 +11,7 @@ char* newTemp() {
 	strcat(str1, str2);
 	char* t;
 	myStrcpy(&t, str1);
-	addOffTable(t, 4);
+	//addOffTable(t, 4);
 	return t;
 }
 
@@ -102,6 +102,8 @@ struct codeList translate_Exp(struct Node* node, char* place) {
 	else if(!strcmp(node->child[1]->info, "INT")) {
 		InterCodes p = (InterCodes)malloc(sizeof(struct InterCodes_));
 		p->code.kind = ASSIGN;
+		char* t1 = newTemp();
+		if(place == NULL) myStrcpy(&place, t1);
 		createVar(&p->code.u.assign.left, place);
 		createConstant(&p->code.u.assign.right, node->child[1]->type_int);
 		p->prev = p->next = NULL;
@@ -111,6 +113,8 @@ struct codeList translate_Exp(struct Node* node, char* place) {
 	else if(!strcmp(node->child[1]->info, "ID") && node->num == 1) {
 		InterCodes p = (InterCodes)malloc(sizeof(struct InterCodes_));
 		p->code.kind = ASSIGN;
+		char* t1 = newTemp();
+		if(place == NULL) myStrcpy(&place, t1);
 		createVar(&p->code.u.assign.left, place);
 		createVar(&p->code.u.assign.right, node->child[1]->type_string);
 		p->prev = p->next = NULL;
@@ -118,12 +122,16 @@ struct codeList translate_Exp(struct Node* node, char* place) {
 		ans.head = ans.tail = p;
 	}
 	else if(!strcmp(node->child[1]->info, "MINUS")) {
+		//printf("Hello\n");
+		//printf("1\n");
 		char* t1 = newTemp();
 		struct codeList code1, code2;
 		code1 = translate_Exp(node->child[2], t1);
 	
 		InterCodes p = (InterCodes)malloc(sizeof(struct InterCodes_));
 		p->code.kind = SUB;
+		char* t2 = newTemp();
+		if(place == NULL) myStrcpy(&place, t2);
 		createVar(&p->code.u.binop.result, place);
 		createConstant(&p->code.u.binop.op1, 0);
 		createVar(&p->code.u.binop.op2, t1);
@@ -217,6 +225,8 @@ struct codeList translate_Exp(struct Node* node, char* place) {
 		InterCodes p = (InterCodes)malloc(sizeof(struct InterCodes_));
 		if(!strcmp(node->child[1]->type_string, "read")) {
 			p->code.kind = READ;
+			char* t1 = newTemp();
+			if(place == NULL) myStrcpy(&place, t1);
 			createVar(&p->code.u.read.name, place);
 		}
 		else {
@@ -282,6 +292,10 @@ struct codeList translate_Exp(struct Node* node, char* place) {
 		
 		InterCodes p = (InterCodes)malloc(sizeof(struct InterCodes_));
 		p->code.kind = ASSIGN;
+		
+		char* t2 = newTemp();
+		if(place == NULL) myStrcpy(&place, t2);
+		
 		createVar(&p->code.u.assign.left, place);
 		createLocation(&p->code.u.assign.right, t1);
 		p->prev = p->next = NULL;
@@ -298,17 +312,20 @@ struct codeList translate_Exp(struct Node* node, char* place) {
 
 		InterCodes p1 = (InterCodes)malloc(sizeof(struct InterCodes_));
 		p1->code.kind = ASSIGN;
+		
+		char* t1 = newTemp();
+		if(place == NULL) myStrcpy(&place, t1);
+
 		createVar(&p1->code.u.assign.left, place);
 		createConstant(&p1->code.u.assign.right, 0);
 		p1->prev = p1->next = NULL;
 		code0.head = code0.tail = p1;
-		
 		code1 = translate_Cond(node, label1, label2);
-
 		code2 = createLabel(label1);
 
 		InterCodes p3 = (InterCodes)malloc(sizeof(struct InterCodes_));
 		p3->code.kind = ASSIGN;
+
 		createVar(&p3->code.u.assign.left, place);
 		createConstant(&p3->code.u.assign.right, 1);
 		p3->prev = p3->next = NULL;
@@ -439,7 +456,7 @@ struct codeList translate_Args(struct Node* node, struct argStr** argList) {
 
 struct codeList translate_Cond(struct Node* node, char* t, char* f) {
 	struct codeList ans;
-	if(!strcmp(node->child[2]->info, "RELOP")) {
+	if(node->num > 1 && !strcmp(node->child[2]->info, "RELOP")) {
 		char* t1 = newTemp();
 		char* t2 = newTemp();
 		struct codeList code1, code2;
@@ -452,7 +469,6 @@ struct codeList translate_Cond(struct Node* node, char* t, char* f) {
 		createVar(&p->code.u.con.op3, t2);
 		createVar(&p->code.u.con.pos, t);
 		p->prev = p->next = NULL;
-	
 		struct codeList code3, code4;
 		code3.head = code3.tail = p;
 		
@@ -461,16 +477,15 @@ struct codeList translate_Cond(struct Node* node, char* t, char* f) {
 		code1 = codePatch(code1.head, &code1.tail, &code2.head, code2.tail);
 		code1 = codePatch(code1.head, &code1.tail, &code3.head, code3.tail);
 		code1 = codePatch(code1.head, &code1.tail, &code4.head, code4.tail);
-
 		ans = code1;
 	}
-	else if(!strcmp(node->child[1]->info, "LP")) {
+	else if(node->num > 1 && !strcmp(node->child[1]->info, "LP")) {
 		return translate_Cond(node->child[2], t, f);
 	}
-	else if(!strcmp(node->child[2]->info, "Exp")) {
+	else if(node->num == 2 && !strcmp(node->child[1]->info, "NOT")) {
 		return translate_Cond(node->child[2], f, t);	
 	}
-	else if(!strcmp(node->child[2]->info, "AND")) {
+	else if(node->num > 1 && !strcmp(node->child[2]->info, "AND")) {
 		char* label1 = newLabel();
 		struct codeList code1, code2;
 		code1 = translate_Cond(node->child[1], label1, f);
@@ -483,7 +498,7 @@ struct codeList translate_Cond(struct Node* node, char* t, char* f) {
 		code1 = codePatch(code1.head, &code1.tail, &code2.head, code2.tail);
 		ans = code1;
 	}
-	else if(!strcmp(node->child[2]->info, "OR")) {
+	else if(node->num > 1 && !strcmp(node->child[2]->info, "OR")) {
 		char* label1 = newLabel();
 		struct codeList code1, code2;
 		code1 = translate_Cond(node->child[1], t, label1);
@@ -609,11 +624,11 @@ struct codeList translate_CompSt(struct Node* node) {
 struct codeList translate_FunDec(struct Node* node) {
 	offTemp = 0;
 	paramTemp = 0;
-	sizeTemp = (struct offset*)malloc(sizeof(struct offset));
+	/*sizeTemp = (struct offset*)malloc(sizeof(struct offset));
 	myStrcpy(&sizeTemp->str, node->child[1]->type_string);
 	sizeTemp->t = 0;
 	sizeTemp->next = sizeTable;
-	sizeTable = sizeTemp;
+	sizeTable = sizeTemp;*/
 	
 	struct codeList ans;
 	InterCodes p = (InterCodes)malloc(sizeof(struct InterCodes_));
@@ -664,7 +679,7 @@ struct codeList translate_ParamDec(struct Node* node) {
 	createVar(&p->code.u.param.name, str);
 	p->prev = p->next = NULL;
 
-	addParamTable(str);
+	//addParamTable(str);
 	struct codeList ans;
 	ans.head = ans.tail = p;
 	return ans;
@@ -703,7 +718,7 @@ void addOffTable(char* str, int size) {
 	myStrcpy(&temp->str, str);
 	temp->t = offTemp;
 	offTemp = offTemp + size;
-	sizeTemp->t = offTemp;
+	//sizeTemp->t = offTemp;
 	temp->next = offTable;
 	offTable = temp;
 }
@@ -724,7 +739,7 @@ struct codeList translate_Dec(struct Node* node) {
 		code1.head = code1.tail = p1;
 	}
 	
-	addOffTable(str, L);
+	//addOffTable(str, L);
 
 	if(node->num == 3) {
 		char* t1 = newTemp();

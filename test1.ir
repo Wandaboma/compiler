@@ -1,66 +1,12 @@
 FUNCTION main :
-READ t1
-a := t1
-READ t2
-b := t2
-READ t3
-c := t3
-t6 := a
-t7 := b
-t4 := t6 + t7
-t5 := c
-IF t4 > t5 GOTO label5
-GOTO label2
-LABEL label5 :
-t10 := b
-t11 := c
-t8 := t10 + t11
-t9 := a
-IF t8 > t9 GOTO label4
-GOTO label2
-LABEL label4 :
-t14 := a
-t15 := c
-t12 := t14 + t15
-t13 := b
-IF t12 > t13 GOTO label1
-GOTO label2
 LABEL label1 :
-t19 := a
-t20 := b
-t17 := t19 + t20
-t18 := c
-t16 := t17 + t18
-cirf := t16
-t25 := b
-t26 := b
-t23 := t25 * t26
-t27 := c
-t28 := c
-t24 := t27 * t28
-t21 := t23 + t24
-t29 := a
-t30 := a
-t22 := t29 * t30
-IF t21 == t22 GOTO label7
-GOTO label6
-LABEL label6 :
-t31 := #3
-type := t31
-GOTO label8
-LABEL label7 :
-t32 := #0
-type := t32
-LABEL label8 :
-t33 := type
-WRITE t33
-t34 := cirf
-WRITE t34
-GOTO label3
+t1 := #1
+IF t1 != #0 GOTO label3
+GOTO label2
 LABEL label2 :
-t36 := #1
-t35 := #0 - t36
-WRITE t35
+t3 := #0
+RETURN t3
+GOTO label1
 LABEL label3 :
-t37 := #0
-RETURN t37
+t5 := #0
+RETURN t5

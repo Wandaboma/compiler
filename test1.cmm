@@ -1,21 +1,6 @@
 int main()
 {
-    int a, b, c;
-    int cirf, type;
-    a = read();
-    b = read();
-    c = read();
-    if(a + b > c && b + c > a && a + c > b)
-    {
-        cirf = a + b + c;
-	if((b * b + c * c == a * a))
-            type = 3;
-        else
-            type = 0;
-        write(type);
-        write(cirf);
-    }
-    else
-        write(-1);
-    return 0;
+	while(-1)
+		return 0;
+	return 0;
 }

@@ -1472,7 +1472,7 @@ yyreduce:
 
 		tempNum = labelNum = 0;
 		struct codeList temp;
-		offTable = paramTable = NULL;
+		offTable = paramTable = sizeTable = NULL;
 		temp = translate(root);
 //		printCode(temp.head);
 //		printTree($$, 0);
